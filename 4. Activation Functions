@@ -1,0 +1,22 @@
+Rectified Linear Unit
+2.0/2.0 points (graded)
+First implement the ReLu activation function, which computes the ReLu of a scalar.
+
+def rectified_linear_unit(x):
+    """ Returns the ReLU of x, or the maximum between 0 and x."""
+    if x <= 0:
+        return 0
+    else:
+        return x
+        
+Taking the Derivative
+2.0/2.0 points (graded)
+Now implement its derivative so that we can properly run backpropagation when training the net. Note: we will consider the derivative at zero to have the same value as the derivative at all negative points.
+
+def rectified_linear_unit_derivative(x):
+    """ Returns the derivative of ReLU."""
+    if x <= 0:
+        return 0
+    else:
+        return 1
+        
