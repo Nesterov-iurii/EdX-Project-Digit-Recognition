@@ -1,0 +1,37 @@
+Convolutional Neural Networks
+3.0/3.0 points (graded)
+We provide skeleton code part2-mnist/nnet_cnn.py which includes examples of some (not all) of the new layers you will need in this part. Using the PyTorch Documentation, complete the code to implement a convolutional neural network with following layers in order:
+
+A convolutional layer with 32 filters of size  3×3 
+
+A ReLU nonlinearity
+
+A max pooling layer with size  2×2 
+
+A convolutional layer with 64 filters of size  3×3 
+
+A ReLU nonlinearity
+
+A max pooling layer with size  2×2 
+
+A flatten layer
+
+A fully connected layer with 128 neurons
+
+A dropout layer with drop probability 0.5
+
+A fully-connected layer with 10 neurons
+
+
+model = nn.Sequential(
+              nn.Conv2d(1, 32, (3, 3)),
+              nn.ReLU(),
+              nn.MaxPool2d((2, 2)),
+              nn.Conv2d(32, 64, (3,3)),
+              nn.ReLU(),
+              nn.MaxPool2d((2, 2)),
+              Flatten(),
+              nn.Linear(1600,128),
+              nn.Dropout(p = 0.5),
+              nn.Linear(128,10)
+            )
