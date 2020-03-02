@@ -1,0 +1,124 @@
+Computing Probabilities for Softmax
+5.0/5.0 points (graded)
+Write a function compute_probabilities that computes, for each data point  x(i) , the probability that  x(i)  is labeled as  j  for  j=0,1,…,k−1 .
+
+def compute_probabilities(X, theta, temp_parameter):
+    """
+    Computes, for each datapoint X[i], the probability that X[i] is labeled as j
+    for j = 0, 1, ..., k-1
+    Args:
+        X - (n, d) NumPy array (n datapoints each with d features)
+        theta - (k, d) NumPy array, where row j represents the parameters of our model for label j
+        temp_parameter - the temperature parameter of softmax function (scalar)
+    Returns:
+        H - (k, n) NumPy array, where each entry H[j][i] is the probability that X[i] is labeled as j
+    """
+    #YOUR CODE HERE
+    
+    term_1 = (theta @ np.transpose(X)) / temp_parameter  #(k,n)
+    c = np.max(term_1 , 0)                               #get max for every n
+    term_1 = np.exp(term_1 - c)                          #convert every entry to exp()
+    scale_coef = np.sum(term_1,0)                        #sums all entries in a column (all k-s per n)
+    scale_coef = 1 / scale_coef                          #finds reciprotial of every entry
+    n = np.shape(scale_coef)[0]                          # number of data points
+    scale_coef = scale_coef.reshape((n))                 #makes the coef into an array (1,n)
+    
+    H = scale_coef * term_1                              #multiplies entry by entry for every row
+    
+    try:
+        return H
+    except:
+        raise NotImplementedError
+        
+    Cost Function
+5.0/5.0 points (graded)
+Write a function compute_cost_function that computes the total cost over every data point.
+
+def compute_cost_function(X, Y, theta, lambda_factor, temp_parameter):
+    """
+    Computes the total cost over every datapoint.
+    Args:
+        X - (n, d) NumPy array (n datapoints each with d features)
+        Y - (n, ) NumPy array containing the labels (a number from 0-9) for each
+            data point
+        theta - (k, d) NumPy array, where row j represents the parameters of our
+                model for label j
+        lambda_factor - the regularization constant (scalar)
+        temp_parameter - the temperature parameter of softmax function (scalar)
+    Returns
+        c - the cost value (scalar)
+    """
+    #YOUR CODE HERE
+    term_1 = np.clip(compute_probabilities(X, theta, temp_parameter), 1e-15, 1-1e-15)
+    term_1 = np.log(term_1)
+    
+    n = np.shape(X)[0]                          # number of data points
+    k = np.shape(theta)[0]
+    
+    '''
+    pick_matrix = np.zeros([n,k])
+    for i in range(n):
+       pick_matrix[i,Y[i]]=1
+    
+    term_1 = -np.sum(np.trace(pick_matrix @ term_1))/n    #pick_matrix choses elements. then with trace we sum diagonals
+    '''
+    sum_t = 0
+    for i in range(n):
+       sum_t += term_1[Y[i],i]
+    
+    term_1 = -sum_t / n
+
+    term_2 = np.sum(np.power(theta , 2)) * lambda_factor / 2
+    
+    loss = term_1 + term_2
+    
+    try:
+        return loss
+    except:    
+        raise NotImplementedError
+        
+   Gradient Descent
+   
+   def run_gradient_descent_iteration(X, Y, theta, alpha, lambda_factor, temp_parameter):
+    """
+    Runs one step of batch gradient descent
+    Args:
+        X - (n, d) NumPy array (n datapoints each with d features)
+        Y - (n, ) NumPy array containing the labels (a number from 0-9) for each
+            data point
+        theta - (k, d) NumPy array, where row j represents the parameters of our
+                model for label j
+        alpha - the learning rate (scalar)
+        lambda_factor - the regularization constant (scalar)
+        temp_parameter - the temperature parameter of softmax function (scalar)
+    Returns:
+        theta - (k, d) NumPy array that is the final value of parameters theta
+    """
+    #YOUR CODE HERE
+    
+    n = np.shape(X)[0]
+    d = np.shape(X)[1]
+    k = np.shape(theta)[0]
+    
+    prob_f = compute_probabilities(X, theta, temp_parameter)
+    
+    #convert all to coo_matrix for more efficient operation
+    #X = sparse.coo_matrix(X)
+    #Y = sparse.coo_matrix(Y)
+    #theta = sparse.coo_matrix(theta)
+    #prob_f = sparse.coo_matrix(prob_f)
+    
+    data_ones = np.ones(n)
+    logic_i = sparse.coo_matrix((data_ones, (Y , range(n) )), shape=(k, n)).toarray()
+    #M = sparse.coo_matrix(([1]*n, (Y, range(n))), shape=(k,n)).toarray()
+    term_1 = -((logic_i - prob_f) @ X / (temp_parameter * n))
+    
+    term_2 = lambda_factor * theta
+    
+    gradient = term_1 + term_2
+    theta = theta - alpha * gradient
+    
+    try:
+        return theta
+    except:
+        raise NotImplementedError
